@@ -1,0 +1,368 @@
+swagger: "2.0"
+info:
+  title: Speaker Booking API
+  description: GDG backend task
+  version: "1.0.0"
+tags:
+  - name: General
+    description: General endpoints
+  - name: User
+    description: User registration and management
+  - name: Speaker
+    description: Speaker registration and management
+  - name: Session
+    description: Session booking and management
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  bearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: JWT Authorization header using the Bearer scheme. Example "Bearer {token}"
+paths:
+  /:
+    get:
+      tags:
+        - General
+      summary: Landing page
+      description: Welcome endpoint with a basic message.
+      responses:
+        200:
+          description: Success message
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Navigate to /apidocs to get started
+
+  /api/user/register:
+    post:
+      tags:
+        - User
+      summary: Register a new user
+      description: Creates a new user account with the provided credentials.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - username
+              - password
+              - email
+            properties:
+              username:
+                type: string
+                example: john_doe
+              password:
+                type: string
+                example: securepassword123
+              email:
+                type: string
+                example: john@example.com
+      responses:
+        200:
+          description: User registered successfully
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+        400:
+          description: Missing fields or invalid content
+        409:
+          description: Username or email already exists
+
+  /api/speaker/register:
+    post:
+      tags:
+        - Speaker
+      summary: Register a new speaker
+      description: Creates a new speaker account with the provided credentials and expertise.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - username
+              - password
+              - email
+              - expertise
+              - price_per_session
+            properties:
+              username:
+                type: string
+                example: expert_speaker
+              password:
+                type: string
+                example: securepassword123
+              email:
+                type: string
+                example: speaker@example.com
+              expertise:
+                type: string
+                example: Public Speaking
+              price_per_session:
+                type: integer
+                example: 100
+      responses:
+        200:
+          description: Speaker registered successfully
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+        400:
+          description: Missing fields or invalid content
+        409:
+          description: Username or email already exists
+
+  /api/user/login:
+    post:
+      tags:
+        - User
+      summary: Authenticate user
+      description: Logs in a user and returns a JWT token for authentication.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - username
+              - email
+              - password
+            properties:
+              username:
+                type: string
+                example: john_doe
+              email:
+                type: string
+                example: john@example.com
+              password:
+                type: string
+                example: securepassword123
+      responses:
+        200:
+          description: Successful login with JWT
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              access_token:
+                type: string
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        401:
+          description: Invalid credentials
+        400:
+          description: Invalid content
+
+  /api/speaker/login:
+    post:
+      tags:
+        - Speaker
+      summary: Authenticate speaker
+      description: Logs in a speaker and returns a JWT token for authentication.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - username
+              - email
+              - password
+            properties:
+              username:
+                type: string
+                example: expert_speaker
+              email:
+                type: string
+                example: speaker@example.com
+              password:
+                type: string
+                example: securepassword123
+      responses:
+        200:
+          description: Successful login with JWT
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              access_token:
+                type: string
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        401:
+          description: Invalid credentials
+        400:
+          description: Invalid content
+
+  /api/user/verify_otp:
+    get:
+      tags:
+        - User
+      summary: Send OTP to user email
+      description: Sends an OTP to the user's registered email address.
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: OTP sent successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: OTP sent successfully
+        409:
+          description: Already verified
+    post:
+      tags:
+        - User
+      summary: Verify user OTP
+      description: Verifies the OTP sent to the user's email and upgrades the user role.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - otp
+            properties:
+              otp:
+                type: integer
+                example: 123456
+      responses:
+        200:
+          description: OTP verified and new access token provided
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              access_token:
+                type: string
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        400:
+          description: OTP missing or invalid
+        409:
+          description: Already verified
+
+  /api/user/profile:
+    get:
+      tags:
+        - User
+      summary: Fetch user profile
+      description: Returns the profile information of the authenticated user.
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User profile retrieved successfully
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                example: john_doe
+              email:
+                type: string
+                example: john@example.com
+        401:
+          description: Not a verified user
+
+  /api/speaker/profile:
+    get:
+      tags:
+        - Speaker
+      summary: Fetch speaker profile
+      description: Returns the profile information of the authenticated speaker.
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Speaker profile retrieved successfully
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                example: expert_speaker
+              email:
+                type: string
+                example: speaker@example.com
+              expertise:
+                type: string
+                example: Public Speaking
+              price_per_session:
+                type: integer
+                example: 100
+        401:
+          description: Not a verified speaker
+
+  /api/book_session:
+    post:
+      tags:
+        - Session
+      summary: Book speaker session
+      description: Books a session with a speaker at the specified time.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            required:
+              - speaker_id
+              - start_time
+            properties:
+              speaker_id:
+                type: integer
+                example: 1
+              start_time:
+                type: string
+                format: date-time
+                example: "2023-12-25T09:00:00"
+      responses:
+        200:
+          description: Session booked successfully
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              message:
+                type: string
+                example: Session booked successfully
+        400:
+          description: Invalid data or time format
+        403:
+          description: Only users can book sessions
+        409:
+          description: Slot already booked
